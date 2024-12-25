@@ -1,0 +1,308 @@
+import java.util.*;
+import java.io.*;
+
+class Student {
+    private int rollNumber;
+    private String name;
+    private int age;
+    private String course;
+    private double marks;
+
+    // Constructor
+    public Student(int rollNumber, String name, int age, String course, double marks) {
+        this.rollNumber = rollNumber;
+        this.name = name;
+        this.age = age;
+        this.course = course;
+        this.marks = marks;
+    }
+
+    // Getters and setters
+    public int getRollNumber() {
+        return rollNumber;
+    }
+
+    public void setRollNumber(int rollNumber) {
+        this.rollNumber = rollNumber;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public String getCourse() {
+        return course;
+    }
+
+    public void setCourse(String course) {
+        this.course = course;
+    }
+
+    public double getMarks() {
+        return marks;
+    }
+
+    public void setMarks(double marks) {
+        this.marks = marks;
+    }
+
+    // Display student details
+    public void displayStudentDetails() {
+        System.out.println("Roll Number: " + rollNumber);
+        System.out.println("Name: " + name);
+        System.out.println("Age: " + age);
+        System.out.println("Course: " + course);
+        System.out.println("Marks: " + marks);
+    }
+}
+
+class StudentManagementSystem {
+    private Map<Integer, Student> studentDatabase;
+
+    public StudentManagementSystem() {
+        studentDatabase = new HashMap<>();
+    }
+
+    // Add a student
+    public void addStudent(Student student) {
+        studentDatabase.put(student.getRollNumber(), student);
+        System.out.println("Student added successfully.");
+    }
+
+    // Display all students
+    public void displayAllStudents() {
+        if (studentDatabase.isEmpty()) {
+            System.out.println("No students found.");
+            return;
+        }
+        for (Student student : studentDatabase.values()) {
+            student.displayStudentDetails();
+            System.out.println("-------------------------------");
+        }
+    }
+
+    // Display student by roll number
+    public void displayStudentByRollNumber(int rollNumber) {
+        Student student = studentDatabase.get(rollNumber);
+        if (student != null) {
+            student.displayStudentDetails();
+        } else {
+            System.out.println("Student not found with roll number " + rollNumber);
+        }
+    }
+
+    // Update student details
+    public void updateStudentDetails(int rollNumber) {
+        Student student = studentDatabase.get(rollNumber);
+        if (student != null) {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Updating details for student with Roll Number: " + rollNumber);
+
+            System.out.print("Enter new name: ");
+            String newName = scanner.nextLine();
+            student.setName(newName);
+
+            System.out.print("Enter new age: ");
+            int newAge = scanner.nextInt();
+            student.setAge(newAge);
+
+            scanner.nextLine(); // Clear buffer
+            System.out.print("Enter new course: ");
+            String newCourse = scanner.nextLine();
+            student.setCourse(newCourse);
+
+            System.out.print("Enter new marks: ");
+            double newMarks = scanner.nextDouble();
+            student.setMarks(newMarks);
+
+            System.out.println("Student details updated successfully.");
+        } else {
+            System.out.println("Student not found with roll number " + rollNumber);
+        }
+    }
+
+    // Delete student by roll number
+    public void deleteStudent(int rollNumber) {
+        if (studentDatabase.containsKey(rollNumber)) {
+            studentDatabase.remove(rollNumber);
+            System.out.println("Student with roll number " + rollNumber + " deleted successfully.");
+        } else {
+            System.out.println("Student not found with roll number " + rollNumber);
+        }
+    }
+
+    // Search student by name
+    public void searchStudentByName(String name) {
+        boolean found = false;
+        for (Student student : studentDatabase.values()) {
+            if (student.getName().equalsIgnoreCase(name)) {
+                student.displayStudentDetails();
+                found = true;
+            }
+        }
+        if (!found) {
+            System.out.println("No student found with the name " + name);
+        }
+    }
+
+    // Sort students by marks
+    public void sortStudentsByMarks() {
+        List<Student> students = new ArrayList<>(studentDatabase.values());
+        students.sort(Comparator.comparingDouble(Student::getMarks).reversed());
+
+        System.out.println("Students sorted by marks:");
+        for (Student student : students) {
+            student.displayStudentDetails();
+            System.out.println("-------------------------------");
+        }
+    }
+
+    // Save student data to file
+    public void saveDataToFile() {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("students.dat"))) {
+            oos.writeObject(studentDatabase);
+            System.out.println("Student data saved to file successfully.");
+        } catch (IOException e) {
+            System.out.println("Error saving data: " + e.getMessage());
+        }
+    }
+
+    // Load student data from file
+    public void loadDataFromFile() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("students.dat"))) {
+            studentDatabase = (Map<Integer, Student>) ois.readObject();
+            System.out.println("Student data loaded from file successfully.");
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Error loading data: " + e.getMessage());
+        }
+    }
+}
+
+public class StudentManagementApp {
+    private static final Scanner scanner = new Scanner(System.in);
+    private static final StudentManagementSystem sms = new StudentManagementSystem();
+
+    public static void main(String[] args) {
+        System.out.println("Welcome to the Student Management System!");
+
+        while (true) {
+            displayMenu();
+            int choice = getChoice();
+            switch (choice) {
+                case 1:
+                    addStudent();
+                    break;
+                case 2:
+                    sms.displayAllStudents();
+                    break;
+                case 3:
+                    viewStudentByRollNumber();
+                    break;
+                case 4:
+                    updateStudent();
+                    break;
+                case 5:
+                    deleteStudent();
+                    break;
+                case 6:
+                    searchStudent();
+                    break;
+                case 7:
+                    sms.sortStudentsByMarks();
+                    break;
+                case 8:
+                    sms.saveDataToFile();
+                    break;
+                case 9:
+                    sms.loadDataFromFile();
+                    break;
+                case 10:
+                    System.out.println("Exiting system...");
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+
+    private static void displayMenu() {
+        System.out.println("\n------ Student Management System ------");
+        System.out.println("1. Add a Student");
+        System.out.println("2. Display All Students");
+        System.out.println("3. Display Student by Roll Number");
+        System.out.println("4. Update Student Details");
+        System.out.println("5. Delete a Student");
+        System.out.println("6. Search Student by Name");
+        System.out.println("7. Sort Students by Marks");
+        System.out.println("8. Save Student Data to File");
+        System.out.println("9. Load Student Data from File");
+        System.out.println("10. Exit");
+        System.out.print("Enter your choice: ");
+    }
+
+    private static int getChoice() {
+        return scanner.nextInt();
+    }
+
+    private static void addStudent() {
+        System.out.println("Enter student details:");
+
+        System.out.print("Roll Number: ");
+        int rollNumber = scanner.nextInt();
+        scanner.nextLine(); // Clear buffer
+
+        System.out.print("Name: ");
+        String name = scanner.nextLine();
+
+        System.out.print("Age: ");
+        int age = scanner.nextInt();
+
+        scanner.nextLine(); // Clear buffer
+        System.out.print("Course: ");
+        String course = scanner.nextLine();
+
+        System.out.print("Marks: ");
+        double marks = scanner.nextDouble();
+
+        Student student = new Student(rollNumber, name, age, course, marks);
+        sms.addStudent(student);
+    }
+
+    private static void viewStudentByRollNumber() {
+        System.out.print("Enter roll number: ");
+        int rollNumber = scanner.nextInt();
+        sms.displayStudentByRollNumber(rollNumber);
+    }
+
+    private static void updateStudent() {
+        System.out.print("Enter roll number of student to update: ");
+        int rollNumber = scanner.nextInt();
+        sms.updateStudentDetails(rollNumber);
+    }
+
+    private static void deleteStudent() {
+        System.out.print("Enter roll number of student to delete: ");
+        int rollNumber = scanner.nextInt();
+        sms.deleteStudent(rollNumber);
+    }
+
+    private static void searchStudent() {
+        System.out.print("Enter name of student to search: ");
+        scanner.nextLine(); // Clear buffer
+        String name = scanner.nextLine();
+        sms.searchStudentByName(name);
+    }
+}
